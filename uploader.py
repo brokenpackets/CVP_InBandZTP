@@ -64,7 +64,7 @@ def add_Container(url_prefix, container_name):
                           'infoPreview': container_name,
                           'action': 'add',
                           'nodeType': 'container',
-                          'nodeId': 'new_container',
+                          'nodeId': container_name,
                           'toId': 'root',
                           'fromId': '',
                           'nodeName': container_name,
