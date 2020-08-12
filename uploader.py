@@ -1,11 +1,11 @@
 #!/usr/bin/env python
+
 import requests
 import json
 import yaml
 import os
 
-###### User Variables
-
+# User Variables
 username = "admin"
 password = "Arista123"
 server1 = "https://192.168.255.50"
@@ -13,7 +13,7 @@ imageName = "EOS-4.23.4M.swi"
 terminAttr = "TerminAttr-1.9.6-1.swix"
 containers_To_Build = ["Leaf", "Spine", "MGMT-ToR", "MGMT-Spine"]
 
-###### Do not modify anything below this line. Or do, I'm not a cop.
+# Do not modify anything below this line. Or do, I'm not a cop.
 connect_timeout = 10
 headers = {"Accept": "application/json", "Content-Type": "application/json"}
 requests.packages.urllib3.disable_warnings()
@@ -125,35 +125,35 @@ def add_configlet_builder(url_prefix, builder_name, builder_body):
     return response.json()
 
 
-#### Login ####
+# Login
 print("###### Logging into Server 1")
 login(server1, username, password)
-#### Upload Image Bundle SWI File ####
+# Upload Image Bundle SWI File
 print("###### Uploading Image Bundle")
 try:
     bundleinfo = upload_image(server1, imageName)
 except Exception as e:
     print("Failure to upload file. Does it exist already? Is it in the working dir?")
 bundleinfo.pop("result", None)
-#### Upload Image Bundle TerminAttr SWIX ####
+# Upload Image Bundle TerminAttr SWIX
 try:
     terminAttrinfo = upload_image(server1, terminAttr)
 except Exception as e:
     print("Failure to upload file. Does it exist already? Is it in the working dir?")
 bundleinfo.pop("result", None)
 terminAttrinfo.pop("result", None)
-#### Create Image Bundle with both SWI and SWIX ####
+# Create Image Bundle with both SWI and SWIX
 try:
     add_Bundle(server1, json.dumps(bundleinfo, terminAttrinfo))
 except Exception as e:
     print("Add bundle failed for some reason...")
-#### Create Container Structure ####
+# Create Container Structure
 for container in containers_To_Build:
     try:
         add_Container(server1, container)
     except Exception as e:
         pass
-#### Upload Configlets / Builders ####
+# Upload Configlets / Builders
 configlets = os.listdir("./Configlets")
 for configlet in configlets:
     if configlet.endswith(".py"):
