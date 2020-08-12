@@ -22,7 +22,7 @@ def login(url_prefix, username, password):
     authdata = {"userId": username, "password": password}
     headers.pop("APP_SESSION_ID", None)
     response = session.post(
-        url_prefix + "/web/login/authenticate.do",
+        f"{url_prefix}/web/login/authenticate.do",
         data=json.dumps(authdata),
         headers=headers,
         timeout=connect_timeout,
@@ -35,19 +35,19 @@ def login(url_prefix, username, password):
 
 
 def logout(url_prefix):
-    response = session.post(url_prefix + "/web/login/logout.do")
+    response = session.post(f"{url_prefix}/web/login/logout.do")
     return response.json()
 
 
 def get_inventory(url_prefix):
-    response = session.get(url_prefix + "/cvpservice/inventory/devices")
+    response = session.get(f"{url_prefix}/cvpservice/inventory/devices")
     if response.json():
         return response.json()
 
 
 def get_builder(url_prefix, builder_name):
     response = session.get(
-        url_prefix + "/cvpservice/configlet/getConfigletByName.do?name=" + builder_name
+        f"{url_prefix}/cvpservice/configlet/getConfigletByName.do?name={builder_name}"
     )
     if response.json()["key"]:
         return response.json()["key"]
@@ -55,48 +55,35 @@ def get_builder(url_prefix, builder_name):
 
 def get_container_configlets(url_prefix, container_key):
     response = session.get(
-        url_prefix
-        + "/cvpservice/ztp/getTempConfigsByContainerId.do?containerId="
-        + container_key
+        f"{url_prefix}/cvpservice/ztp/getTempConfigsByContainerId.do?containerId={container_key}"
     )
     return response.json()
 
 
 def get_configlets_by_device(url_prefix, device_mac):
     response = session.get(
-        url_prefix
-        + "/cvpservice/provisioning/getConfigletsByNetElementId.do?netElementId="
-        + device_mac
-        + "&startIndex=0&endIndex=0"
+        f"{url_prefix}/cvpservice/provisioning/getConfigletsByNetElementId.do?netElementId={device_mac}&startIndex=0&endIndex=0"
     )
     return response.json()
 
 
 def get_configlet_by_name(url_prefix, configlet_name):
     response = session.get(
-        url_prefix
-        + "/cvpservice/configlet/getConfigletByName.do?name="
-        + configlet_name
+        f"{url_prefix}/cvpservice/configlet/getConfigletByName.do?name={configlet_name}"
     )
     return response.json()
 
 
 def search_configlets(url_prefix, configlet_name):
     response = session.get(
-        url_prefix
-        + "/cvpservice/configlet/searchConfiglets.do?type=static&queryparam="
-        + configlet_name
-        + "&startIndex=0&endIndex=0"
+        f"{url_prefix}/cvpservice/configlet/searchConfiglets.do?type=static&queryparam={configlet_name}&startIndex=0&endIndex=0"
     )
     return response.json()
 
 
 def get_container(url_prefix, container_name):
     response = session.get(
-        url_prefix
-        + "/cvpservice/provisioning/searchTopology.do?queryParam="
-        + container_name
-        + "&startIndex=0&endIndex=0"
+        f"{url_prefix}/cvpservice/provisioning/searchTopology.do?queryParam={container_name}&startIndex=0&endIndex=0"
     )
     if response.json()["containerList"][0]["key"]:
         return response.json()["containerList"][0]["key"]
@@ -104,8 +91,7 @@ def get_container(url_prefix, container_name):
 
 def get_temp_configs(url_prefix, node_id):
     response = session.get(
-        url_prefix + "/cvpservice/provisioning/getTempConfigsByNetElementId."
-        "do?netElementId=" + node_id
+        f"{url_prefix}/cvpservice/provisioning/getTempConfigsByNetElementId.do?netElementId={node_id}"
     )
     return response.json()
 
@@ -120,14 +106,14 @@ def run_builder(url_prefix, configlet_key, container_key):
         }
     )
     response = session.post(
-        url_prefix + "/cvpservice/configlet/autoConfigletGenerator.do", data=data
+        f"{url_prefix}/cvpservice/configlet/autoConfigletGenerator.do", data=data
     )
     return response.json()
 
 
 def save_topology(url_prefix):
     response = session.post(
-        url_prefix + "/cvpservice/provisioning/v2/saveTopology.do", data=json.dumps([])
+        f"{url_prefix}/cvpservice/provisioning/v2/saveTopology.do", data=json.dumps([])
     )
     return response.json()
 
@@ -142,8 +128,8 @@ def apply_configlets(url_prefix, node_name, node_ip, device_mac, new_configlets)
         cnames.append(entry["name"])
         ckeys.append(entry["key"])
 
-    info = "ZTPBuilder: Configlet Assign: to Device " + node_name
-    info_preview = "<b>Configlet Assign:</b> to Device " + node_name
+    info = f"ZTPBuilder: Configlet Assign: to Device {node_name}"
+    info_preview = f"<b>Configlet Assign:</b> to Device {node_name}"
     temp_data = json.dumps(
         {
             "data": [
@@ -178,8 +164,7 @@ def apply_configlets(url_prefix, node_name, node_ip, device_mac, new_configlets)
     )
 
     response = session.post(
-        url_prefix
-        + "/cvpservice/ztp/addTempAction.do?format=topology&queryParam=&nodeId=root",
+        f"{url_prefix}/cvpservice/ztp/addTempAction.do?format=topology&queryParam=&nodeId=root",
         data=temp_data,
     )
     # return temp_data
@@ -191,11 +176,8 @@ def move_device(url_prefix, node_name, node_id, to_id, to_name):
         {
             "data": [
                 {
-                    "info": "Device "
-                    + to_name
-                    + "move from undefined to Container "
-                    + to_id,
-                    "infoPreview": "<b>Device ZTP Add:</b> " + to_name,
+                    "info": f"Device {to_name} move from undefined to Container {to_id}",
+                    "infoPreview": f"<b>Device ZTP Add:</b> {to_name}",
                     "action": "update",
                     "nodeType": "netelement",
                     "nodeId": node_id,
@@ -209,8 +191,7 @@ def move_device(url_prefix, node_name, node_id, to_id, to_name):
         }
     )
     response = session.post(
-        url_prefix
-        + "/cvpservice/ztp/addTempAction.do?format=topology&queryParam=&nodeId=root",
+        f"{url_prefix}/cvpservice/ztp/addTempAction.do?format=topology&queryParam=&nodeId=root",
         data=temp_data,
     )
     # return temp_data
@@ -230,9 +211,8 @@ def add_temp_action(
         {
             "data": [
                 {
-                    "info": "Configlet Assign: to container " + container_name,
-                    "infoPreview": "<b>Configlet Assign:</b> to container "
-                    + container_name,
+                    "info": f"Configlet Assign: to container {container_name}",
+                    "infoPreview": f"<b>Configlet Assign:</b> to container {container_name}",
                     "action": "associate",
                     "nodeType": "configlet",
                     "nodeId": "",
@@ -256,8 +236,7 @@ def add_temp_action(
     )
 
     response = session.post(
-        url_prefix
-        + "/cvpservice/ztp/addTempAction.do?format=topology&queryParam=&nodeId=root",
+        f"{url_prefix}/cvpservice/ztp/addTempAction.do?format=topology&queryParam=&nodeId=root",
         data=temp_data,
     )
     # return temp_data
@@ -281,7 +260,7 @@ for device in ztp_devices:
                 to_name = template
                 node_ip = device["ipAddress"]
                 move = move_device(server1, node_name, node_id, to_id, to_name)
-                ds_configlets = search_configlets(server1, "DS_" + template + "_")
+                ds_configlets = search_configlets(server1, f"DS_{template}_")
                 print(ds_configlets)
                 # configletList = get_configlets_by_device(server1,node_id)
                 tempConfiglets = get_temp_configs(server1, node_id)
@@ -292,7 +271,7 @@ for device in ztp_devices:
                         output = get_configlet_by_name(server1, config["name"])
                         ds_list.extend([output])
                     new_configlets.extend(ds_list)
-                    print("Assigning DS Configlets to " + node_name)
+                    print(f"Assigning DS Configlets to {node_name}")
                     assign = apply_configlets(
                         server1, node_name, node_ip, node_id, new_configlets
                     )

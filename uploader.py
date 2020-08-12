@@ -24,7 +24,7 @@ def login(url_prefix, username, password):
     auth_data = {"userId": username, "password": password}
     headers.pop("APP_SESSION_ID", None)
     response = session.post(
-        url_prefix + "/web/login/authenticate.do",
+        f"{url_prefix}/web/login/authenticate.do",
         data=json.dumps(auth_data),
         headers=headers,
         timeout=connect_timeout,
@@ -37,13 +37,13 @@ def login(url_prefix, username, password):
 
 
 def logout(url_prefix):
-    response = session.post(url_prefix + "/web/login/logout.do")
+    response = session.post(f"{url_prefix}/web/login/logout.do")
     return response.json()
 
 
 def save_topology(url_prefix):
     response = session.post(
-        url_prefix + "/cvpservice/provisioning/v2/saveTopology.do", data=json.dumps([])
+        f"{url_prefix}/cvpservice/provisioning/v2/saveTopology.do", data=json.dumps([])
     )
     return response.json()
 
@@ -51,7 +51,7 @@ def save_topology(url_prefix):
 def add_configlet(url_prefix, configlet_name, configlet_body):
     temp_data = json.dumps({"config": configlet_body, "name": configlet_name})
     response = session.post(
-        url_prefix + "/cvpservice/configlet/addConfiglet.do", data=temp_data
+        f"{url_prefix}/cvpservice/configlet/addConfiglet.do", data=temp_data
     )
     # return temp_data
     return response.json()
@@ -61,7 +61,7 @@ def upload_image(url_prefix, image_name):
     with open(image_name, "rb") as image_binary:
         image_dict = {"file": image_binary}
         response = session.post(
-            url_prefix + "/cvpservice/image/addImage.do", files=image_dict
+            f"{url_prefix}/cvpservice/image/addImage.do", files=image_dict
         )
     return response.json()
 
@@ -73,7 +73,7 @@ def add_bundle(url_prefix, image_bundle_name):
         "name": "DefaultBundle",
     }
     response = session.post(
-        url_prefix + "/cvpservice/image/saveImageBundle.do", data=json.dumps(data)
+        f"{url_prefix}/cvpservice/image/saveImageBundle.do", data=json.dumps(data)
     )
     return response.json()
 
@@ -82,7 +82,7 @@ def add_container(url_prefix, container_name):
     data = {
         "data": [
             {
-                "info": "adding Container " + container_name,
+                "info": f"adding Container {container_name}",
                 "infoPreview": container_name,
                 "action": "add",
                 "nodeType": "container",
@@ -97,8 +97,7 @@ def add_container(url_prefix, container_name):
         ]
     }
     response = session.post(
-        url_prefix
-        + "/cvpservice/ztp/addTempAction.do?format=topology&queryParam=&nodeId=root",
+        f"{url_prefix}/cvpservice/ztp/addTempAction.do?format=topology&queryParam=&nodeId=root",
         data=json.dumps(data),
     )
     print(json.dumps(data))
@@ -108,7 +107,7 @@ def add_container(url_prefix, container_name):
 def add_configlet(url_prefix, configlet_name, configlet_body):
     temp_data = json.dumps({"config": configlet_body, "name": configlet_name})
     response = session.post(
-        url_prefix + "/cvpservice/configlet/addConfiglet.do", data=temp_data
+        f"{url_prefix}/cvpservice/configlet/addConfiglet.do", data=temp_data
     )
     # return temp_data
     return response.json()
@@ -119,7 +118,7 @@ def add_configlet_builder(url_prefix, builder_name, builder_body):
         {"name": builder_name, "data": {"main_script": {"data": builder_body}}}
     )
     response = session.post(
-        url_prefix + "/cvpservice/configlet/addConfigletBuilder.do?isDraft=false",
+        f"{url_prefix}/cvpservice/configlet/addConfigletBuilder.do?isDraft=false",
         data=temp_data,
     )
     return response.json()
@@ -157,10 +156,10 @@ for container in containers_to_build:
 configlets = os.listdir("./Configlets")
 for configlet in configlets:
     if configlet.endswith(".py"):
-        with open("./Configlets/" + configlet, "r") as f:
+        with open(f"./Configlets/{configlet}", "r") as f:
             output = add_configlet_builder(server1, configlet, f.read())
             print(output)
     else:
-        with open("./Configlets/" + configlet, "r") as f:
+        with open(f"./Configlets/{configlet}", "r") as f:
             output = add_configlet(server1, configlet, f.read())
             print(output)
