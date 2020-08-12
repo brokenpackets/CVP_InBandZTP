@@ -132,29 +132,26 @@ login(server1, username, password)
 print("###### Uploading Image Bundle")
 try:
     bundleinfo = upload_image(server1, imageName)
-except:
+except Exception as e:
     print("Failure to upload file. Does it exist already? Is it in the working dir?")
-    pass
 bundleinfo.pop("result", None)
 #### Upload Image Bundle TerminAttr SWIX ####
 try:
     terminAttrinfo = upload_image(server1, terminAttr)
-except:
+except Exception as e:
     print("Failure to upload file. Does it exist already? Is it in the working dir?")
-    pass
 bundleinfo.pop("result", None)
 terminAttrinfo.pop("result", None)
 #### Create Image Bundle with both SWI and SWIX ####
 try:
     add_Bundle(server1, json.dumps(bundleinfo, terminAttrinfo))
-except:
+except Exception as e:
     print("Add bundle failed for some reason...")
-    pass
 #### Create Container Structure ####
 for container in containers_To_Build:
     try:
         add_Container(server1, container)
-    except:
+    except Exception as e:
         pass
 #### Upload Configlets / Builders ####
 configlets = os.listdir("./Configlets")
