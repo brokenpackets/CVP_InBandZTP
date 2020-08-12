@@ -9,9 +9,9 @@ import os
 username = "admin"
 password = "Arista123"
 server1 = "https://192.168.255.50"
-imageName = "EOS-4.23.4M.swi"
-terminAttr = "TerminAttr-1.9.6-1.swix"
-containers_To_Build = ["Leaf", "Spine", "MGMT-ToR", "MGMT-Spine"]
+image_name = "EOS-4.23.4M.swi"
+terminattr = "TerminAttr-1.9.6-1.swix"
+containers_to_build = ["Leaf", "Spine", "MGMT-ToR", "MGMT-Spine"]
 
 # Do not modify anything below this line. Or do, I'm not a cop.
 connect_timeout = 10
@@ -21,11 +21,11 @@ session = requests.Session()
 
 
 def login(url_prefix, username, password):
-    authdata = {"userId": username, "password": password}
+    auth_data = {"userId": username, "password": password}
     headers.pop("APP_SESSION_ID", None)
     response = session.post(
         url_prefix + "/web/login/authenticate.do",
-        data=json.dumps(authdata),
+        data=json.dumps(auth_data),
         headers=headers,
         timeout=connect_timeout,
         verify=False,
@@ -49,26 +49,26 @@ def save_topology(url_prefix):
 
 
 def add_configlet(url_prefix, configlet_name, configlet_body):
-    tempData = json.dumps({"config": configlet_body, "name": configlet_name})
+    temp_data = json.dumps({"config": configlet_body, "name": configlet_name})
     response = session.post(
-        url_prefix + "/cvpservice/configlet/addConfiglet.do", data=tempData
+        url_prefix + "/cvpservice/configlet/addConfiglet.do", data=temp_data
     )
-    # return tempData
+    # return temp_data
     return response.json()
 
 
-def upload_image(url_prefix, imageName):
-    with open(imageName, "rb") as imageBinary:
-        imageDict = {"file": imageBinary}
+def upload_image(url_prefix, image_name):
+    with open(image_name, "rb") as image_binary:
+        image_dict = {"file": image_binary}
         response = session.post(
-            url_prefix + "/cvpservice/image/addImage.do", files=imageDict
+            url_prefix + "/cvpservice/image/addImage.do", files=image_dict
         )
     return response.json()
 
 
-def add_Bundle(url_prefix, imageBundleName):
+def add_bundle(url_prefix, image_bundle_name):
     data = {
-        "images": [bundleinfo, terminAttrinfo],
+        "images": [bundle_info, terminattr_info],
         "isCertifiedImage": "true",
         "name": "DefaultBundle",
     }
@@ -78,7 +78,7 @@ def add_Bundle(url_prefix, imageBundleName):
     return response.json()
 
 
-def add_Container(url_prefix, container_name):
+def add_container(url_prefix, container_name):
     data = {
         "data": [
             {
@@ -106,21 +106,21 @@ def add_Container(url_prefix, container_name):
 
 
 def add_configlet(url_prefix, configlet_name, configlet_body):
-    tempData = json.dumps({"config": configlet_body, "name": configlet_name})
+    temp_data = json.dumps({"config": configlet_body, "name": configlet_name})
     response = session.post(
-        url_prefix + "/cvpservice/configlet/addConfiglet.do", data=tempData
+        url_prefix + "/cvpservice/configlet/addConfiglet.do", data=temp_data
     )
-    # return tempData
+    # return temp_data
     return response.json()
 
 
 def add_configlet_builder(url_prefix, builder_name, builder_body):
-    tempData = json.dumps(
+    temp_data = json.dumps(
         {"name": builder_name, "data": {"main_script": {"data": builder_body}}}
     )
     response = session.post(
         url_prefix + "/cvpservice/configlet/addConfigletBuilder.do?isDraft=false",
-        data=tempData,
+        data=temp_data,
     )
     return response.json()
 
@@ -131,26 +131,26 @@ login(server1, username, password)
 # Upload Image Bundle SWI File
 print("###### Uploading Image Bundle")
 try:
-    bundleinfo = upload_image(server1, imageName)
+    bundle_info = upload_image(server1, image_name)
 except Exception as e:
     print("Failure to upload file. Does it exist already? Is it in the working dir?")
-bundleinfo.pop("result", None)
+bundle_info.pop("result", None)
 # Upload Image Bundle TerminAttr SWIX
 try:
-    terminAttrinfo = upload_image(server1, terminAttr)
+    terminattr_info = upload_image(server1, terminattr)
 except Exception as e:
     print("Failure to upload file. Does it exist already? Is it in the working dir?")
-bundleinfo.pop("result", None)
-terminAttrinfo.pop("result", None)
+bundle_info.pop("result", None)
+terminattr_info.pop("result", None)
 # Create Image Bundle with both SWI and SWIX
 try:
-    add_Bundle(server1, json.dumps(bundleinfo, terminAttrinfo))
+    add_bundle(server1, json.dumps(bundle_info, terminattr_info))
 except Exception as e:
     print("Add bundle failed for some reason...")
 # Create Container Structure
-for container in containers_To_Build:
+for container in containers_to_build:
     try:
-        add_Container(server1, container)
+        add_container(server1, container)
     except Exception as e:
         pass
 # Upload Configlets / Builders

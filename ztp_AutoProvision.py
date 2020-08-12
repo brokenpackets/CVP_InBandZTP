@@ -62,28 +62,30 @@ def get_container_configlets(url_prefix, container_key):
     return response.json()
 
 
-def get_configlets_by_device(url_prefix, deviceMac):
+def get_configlets_by_device(url_prefix, device_mac):
     response = session.get(
         url_prefix
         + "/cvpservice/provisioning/getConfigletsByNetElementId.do?netElementId="
-        + deviceMac
+        + device_mac
         + "&startIndex=0&endIndex=0"
     )
     return response.json()
 
 
-def get_configlet_by_name(url_prefix, configletname):
+def get_configlet_by_name(url_prefix, configlet_name):
     response = session.get(
-        url_prefix + "/cvpservice/configlet/getConfigletByName.do?name=" + configletname
+        url_prefix
+        + "/cvpservice/configlet/getConfigletByName.do?name="
+        + configlet_name
     )
     return response.json()
 
 
-def search_configlets(url_prefix, configletname):
+def search_configlets(url_prefix, configlet_name):
     response = session.get(
         url_prefix
         + "/cvpservice/configlet/searchConfiglets.do?type=static&queryparam="
-        + configletname
+        + configlet_name
         + "&startIndex=0&endIndex=0"
     )
     return response.json()
@@ -100,10 +102,10 @@ def get_container(url_prefix, container_name):
         return response.json()["containerList"][0]["key"]
 
 
-def get_temp_configs(url_prefix, nodeId):
+def get_temp_configs(url_prefix, node_id):
     response = session.get(
         url_prefix + "/cvpservice/provisioning/getTempConfigsByNetElementId."
-        "do?netElementId=" + nodeId
+        "do?netElementId=" + node_id
     )
     return response.json()
 
@@ -130,19 +132,19 @@ def save_topology(url_prefix):
     return response.json()
 
 
-def apply_configlets(url_prefix, nodeName, nodeIp, deviceMac, newConfiglets):
-    configlets = get_configlets_by_device(url_prefix, deviceMac)
+def apply_configlets(url_prefix, node_name, node_ip, device_mac, new_configlets):
+    configlets = get_configlets_by_device(url_prefix, device_mac)
     cnames = []
     ckeys = []
 
     # Add the new configlets to the end of the arrays
-    for entry in newConfiglets:
+    for entry in new_configlets:
         cnames.append(entry["name"])
         ckeys.append(entry["key"])
 
-    info = "ZTPBuilder: Configlet Assign: to Device " + nodeName
-    info_preview = "<b>Configlet Assign:</b> to Device " + nodeName
-    tempData = json.dumps(
+    info = "ZTPBuilder: Configlet Assign: to Device " + node_name
+    info_preview = "<b>Configlet Assign:</b> to Device " + node_name
+    temp_data = json.dumps(
         {
             "data": [
                 {
@@ -160,14 +162,14 @@ def apply_configlets(url_prefix, nodeName, nodeIp, deviceMac, newConfiglets):
                     "configletBuilderNamesList": [],
                     "ignoreConfigletBuilderList": [],
                     "ignoreConfigletBuilderNamesList": [],
-                    "toId": deviceMac,
+                    "toId": device_mac,
                     "toIdType": "netelement",
                     "fromId": "",
                     "nodeName": "",
                     "fromName": "",
-                    "toName": nodeName,
-                    "nodeIpAddress": nodeIp,
-                    "nodeTargetIpAddress": nodeIp,
+                    "toName": node_name,
+                    "nodeIpAddress": node_ip,
+                    "nodeTargetIpAddress": node_ip,
                     "childTasks": [],
                     "parentTask": "",
                 }
@@ -178,29 +180,29 @@ def apply_configlets(url_prefix, nodeName, nodeIp, deviceMac, newConfiglets):
     response = session.post(
         url_prefix
         + "/cvpservice/ztp/addTempAction.do?format=topology&queryParam=&nodeId=root",
-        data=tempData,
+        data=temp_data,
     )
-    # return tempData
+    # return temp_data
     return response.json()
 
 
-def move_device(url_prefix, nodeName, nodeId, toId, toName):
-    tempData = json.dumps(
+def move_device(url_prefix, node_name, node_id, to_id, to_name):
+    temp_data = json.dumps(
         {
             "data": [
                 {
                     "info": "Device "
-                    + toName
+                    + to_name
                     + "move from undefined to Container "
-                    + toId,
-                    "infoPreview": "<b>Device ZTP Add:</b> " + toName,
+                    + to_id,
+                    "infoPreview": "<b>Device ZTP Add:</b> " + to_name,
                     "action": "update",
                     "nodeType": "netelement",
-                    "nodeId": nodeId,
-                    "toId": toId,
+                    "nodeId": node_id,
+                    "toId": to_id,
                     "fromId": "undefined_container",
-                    "nodeName": nodeName,
-                    "toName": toName,
+                    "nodeName": node_name,
+                    "toName": to_name,
                     "toIdType": "container",
                 }
             ]
@@ -209,9 +211,9 @@ def move_device(url_prefix, nodeName, nodeId, toId, toName):
     response = session.post(
         url_prefix
         + "/cvpservice/ztp/addTempAction.do?format=topology&queryParam=&nodeId=root",
-        data=tempData,
+        data=temp_data,
     )
-    # return tempData
+    # return temp_data
     return response.json()
 
 
@@ -224,7 +226,7 @@ def add_temp_action(
     current_builder_key,
     current_builder_name,
 ):
-    tempData = json.dumps(
+    temp_data = json.dumps(
         {
             "data": [
                 {
@@ -256,43 +258,43 @@ def add_temp_action(
     response = session.post(
         url_prefix
         + "/cvpservice/ztp/addTempAction.do?format=topology&queryParam=&nodeId=root",
-        data=tempData,
+        data=temp_data,
     )
-    # return tempData
+    # return temp_data
     return response.json()
 
 
 print("###### Logging into Server 1")
 login(server1, username, password)
 print("###### Pulling down YAML File")
-yamlfile = get_configlet_by_name(server1, yaml_name)["config"]
-yamlbody = yaml.load(yamlfile)
+yaml_file = get_configlet_by_name(server1, yaml_name)["config"]
+yaml_body = yaml.load(yaml_file)
 print("###### Getting list of devices in Undefined Container")
-ztpdevices = get_inventory(server1)
-for device in ztpdevices:
+ztp_devices = get_inventory(server1)
+for device in ztp_devices:
     if device["parentContainerKey"] == "undefined_container":
-        for template in yamlbody:
-            if yamlbody[template]["Serial"] == device["serialNumber"]:
-                nodeName = device["fqdn"]
-                nodeId = device["systemMacAddress"]
-                toId = get_container(server1, yamlbody[template]["container"])
-                toName = template
-                nodeIp = device["ipAddress"]
-                move = move_device(server1, nodeName, nodeId, toId, toName)
+        for template in yaml_body:
+            if yaml_body[template]["Serial"] == device["serialNumber"]:
+                node_name = device["fqdn"]
+                node_id = device["systemMacAddress"]
+                to_id = get_container(server1, yaml_body[template]["container"])
+                to_name = template
+                node_ip = device["ipAddress"]
+                move = move_device(server1, node_name, node_id, to_id, to_name)
                 ds_configlets = search_configlets(server1, "DS_" + template + "_")
                 print(ds_configlets)
-                # configletList = get_configlets_by_device(server1,nodeId)
-                tempConfiglets = get_temp_configs(server1, nodeId)
-                newConfiglets = tempConfiglets["proposedConfiglets"]
-                dsList = []
+                # configletList = get_configlets_by_device(server1,node_id)
+                tempConfiglets = get_temp_configs(server1, node_id)
+                new_configlets = tempConfiglets["proposedConfiglets"]
+                ds_list = []
                 if int(ds_configlets["total"]) > 0:
                     for config in ds_configlets["data"]:
                         output = get_configlet_by_name(server1, config["name"])
-                        dsList.extend([output])
-                    newConfiglets.extend(dsList)
-                    print("Assigning DS Configlets to " + nodeName)
+                        ds_list.extend([output])
+                    new_configlets.extend(ds_list)
+                    print("Assigning DS Configlets to " + node_name)
                     assign = apply_configlets(
-                        server1, nodeName, nodeIp, nodeId, newConfiglets
+                        server1, node_name, node_ip, node_id, new_configlets
                     )
 # Once temp action created, save will cause it to be committed, and generate
 # the tasks to run against devices. Can automate running them if needed, but
@@ -301,4 +303,3 @@ print("##### Saving Topology")
 # save = save_topology(server1)
 # logout(server1)
 print("##### Complete")
-
