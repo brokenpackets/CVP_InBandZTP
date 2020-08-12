@@ -1,17 +1,17 @@
 #!/usr/bin/env python
+
 import requests
 import json
 import yaml
 
-###### User Variables
-
+# User Variables
 username = "admin"
 password = "Arista123"
 server1 = "https://192.168.255.50"
 container_name = "Tenant"
 yaml_name = "ztp_SeedData.yaml"
 
-###### Do not modify anything below this line. Or do, I'm not a cop.
+# Do not modify anything below this line. Or do, I'm not a cop.
 connect_timeout = 10
 headers = {"Accept": "application/json", "Content-Type": "application/json"}
 requests.packages.urllib3.disable_warnings()
