@@ -1,0 +1,5 @@
+---
+- name: dc1-service02
+  container: Leaf
+  serial: SSJ00000000
+...
