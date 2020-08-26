@@ -8,7 +8,7 @@ if CVPGlobalVariables.getValue(GlobalVariableNames.ZTP_STATE) == 'true':
     device_user = CVPGlobalVariables.getValue(GlobalVariableNames.ZTP_USERNAME)
     device_pass =CVPGlobalVariables.getValue(GlobalVariableNames.ZTP_PASSWORD)
     device = Device(device_ip,device_user,device_pass)
-    SVIConfig = device.runCmds(['enable','interface vlan '+str(Vlan_ID),'ip address dhcp'])[1]['response']
+    SVIConfig = device.runCmds(['enable','interface vlan '+str(Vlan_Id),'ip address dhcp'])[1]['response']
     iflist = device.runCmds(['enable','show interfaces status'])[1]['response']
     for item in iflist['interfaceStatuses'].keys():
        if item.startswith('Ethernet'):
