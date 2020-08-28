@@ -371,17 +371,14 @@ class ConvCloudVision(CloudVision):
             return self.get_image_bundle_by_name(name=bundle_name)
 
     def associate_configlets(
-        self, configlets: list, device_name: str, save: Optional[bool] = False
+        self, configlets: list, device_name: str, target_ip: Optional[str] = None, save: Optional[bool] = False
     ) -> Any:
         device = self.get_device_by_name(device_name)
         device_id = device.get("key")
         device_ip = device.get("ipAddress")
 
-        # configlets = self.get_configlets_by_device(device_id)
         configlet_names = []
         configlet_keys = []
-
-        # Add the new configlets to the end of the arrays
         for configlet in configlets:
             configlet_names.append(configlet["name"])
             configlet_keys.append(configlet["key"])
@@ -409,7 +406,7 @@ class ConvCloudVision(CloudVision):
             "fromName": "",
             "toName": device_name,
             "nodeIpAddress": device_ip,
-            "nodeTargetIpAddress": device_ip,
+            "nodeTargetIpAddress": target_ip or device_ip,
             "childTasks": [],
             "parentTask": "",
         }

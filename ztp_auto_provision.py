@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import logging
-from typing import Any
 
 from ruamel.yaml import YAML
 
@@ -11,7 +10,7 @@ from cloudvision import ConvCloudVision, CvpWarning
 logging.basicConfig(level="DEBUG")
 
 
-def load_yaml(data) -> Any:
+def load_yaml(data):
     return YAML(typ="safe").load(data)
 
 
@@ -38,10 +37,11 @@ def main():
 
             container_name = data.get("container")
             device_id = device.get("systemMacAddress")
-            device_name = device.get("fqdn")
+            device_raw_name = device.get("fqdn")
             device_new_name = data.get("name")
+            device_proposed_ip = data.get("ip")
             try:
-                cvp.move_device_to_container(container_name, device_name)
+                cvp.move_device_to_container(container_name, device_raw_name)
             except CvpWarning:
                 pass
 
@@ -51,7 +51,8 @@ def main():
             ds_configlets = cvp.search_configlets(f"ds_{device_new_name}_").get("data")
             cvp.associate_configlets(
                 configlets=proposed_configlets + ds_configlets,
-                device_name=device_name,
+                device_name=device_raw_name,
+                target_ip=device_proposed_ip,
                 save=True,
             )
 
