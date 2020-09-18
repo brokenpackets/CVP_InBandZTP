@@ -54,7 +54,7 @@ def main():
                 configlet_builder_id = cvp.get_configlet_by_name(
                     "ztp_l2_domain.py"
                 ).get("key")
-                response = cvp.autobuilderconfiglet_generator(
+                response = cvp.auto_configlet_generator(
                     configlet_builder_id, net_element_ids=[device_id]
                 )
                 builder = response["data"][0]["configlet"]
