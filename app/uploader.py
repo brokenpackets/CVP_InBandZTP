@@ -3,18 +3,15 @@
 import logging
 from pathlib import Path
 
-from cloudvision import ConvCloudVision, CvpWarning
+from cvpibztp.cloudvision import ConvCloudVision, CvpWarning
+from cvpibztp.common import connection_details
 
-
-logging.basicConfig(level="INFO")
+logging.basicConfig(level="DEBUG")
+log = logging.getLogger(__name__)
 
 
 def main():
-    server = "cvp-green.lab.tedor.org"
-    username = "cvpadmin"
-    password = "Arista123"
-
-    with ConvCloudVision(server, username, password, verify=False) as cvp:
+    with ConvCloudVision(**connection_details()) as cvp:
         bundle_name = "DefaultBundle"
         image_names = {"EOS64-4.23.4.2M.swi", "TerminAttr-1.9.6-1.swix"}
         bundle_id = cvp.create_image_bundle(bundle_name, *image_names).get("id")

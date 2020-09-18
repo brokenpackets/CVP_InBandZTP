@@ -1,9 +1,11 @@
+# -*- coding: utf-8 -*-
+
 import logging
 from typing import Any, List, Optional, Set, Union
 
 import requests
 
-log = logging.getLogger("cvpy")
+log = logging.getLogger(__name__)
 
 
 class CvpError(RuntimeError):
@@ -50,7 +52,10 @@ class CloudVision:
         endpoint = "cvpservice/ztp/addTempAction.do"
         params = ["format=topology", "queryParam", "nodeId=root"]
         return self._post(
-            endpoint, params=params, payload={"data": [payload]}, warnings=warnings
+            endpoint,
+            params=params,
+            payload={"data": [payload]},
+            warnings=warnings,
         )
 
     def _get(
@@ -217,13 +222,31 @@ class CloudVision:
             self._save_topology()
         return response
 
+    def auto_configlet_generator(
+        self,
+        configlet_builder_id: str,
+        container_id: Optional[str] = None,
+        net_element_ids: Optional[str] = None,
+    ) -> Any:
+        endpoint = "cvpservice/configlet/autoConfigletGenerator.do"
+        payload = {
+            "netElementIds": net_element_ids or [],
+            "configletBuilderId": configlet_builder_id,
+            "containerId": container_id or "",
+            "pageType": "container",
+        }
+        return self._post(endpoint, payload=payload)
+
     def get_configlet_by_name(self, name: str) -> Any:
         endpoint = "cvpservice/configlet/getConfigletByName.do"
         params = f"name={name or ''}"
         return self._get(endpoint, params=params)
 
     def get_configlets_by_device(
-        self, net_element_id: str, start: Optional[int] = 0, end: Optional[int] = 0,
+        self,
+        net_element_id: str,
+        start: Optional[int] = 0,
+        end: Optional[int] = 0,
     ) -> Any:
         endpoint = "cvpservice/provisioning/getConfigletsByNetElementId.do"
         params = [
@@ -279,7 +302,10 @@ class CloudVision:
         return self._get(endpoint, params=params)
 
     def save_image_bundle(
-        self, name: str, *images: str, certified: Optional[bool] = True,
+        self,
+        name: str,
+        *images: str,
+        certified: Optional[bool] = True,
     ) -> Any:
         # warnings = {
         #     162518,  # Failure - Data already exists in Database
@@ -371,7 +397,11 @@ class ConvCloudVision(CloudVision):
             return self.get_image_bundle_by_name(name=bundle_name)
 
     def associate_configlets(
-        self, configlets: list, device_name: str, target_ip: Optional[str] = None, save: Optional[bool] = False
+        self,
+        configlets: list,
+        device_name: str,
+        target_ip: Optional[str] = None,
+        save: Optional[bool] = False,
     ) -> Any:
         device = self.get_device_by_name(device_name)
         device_id = device.get("key")
@@ -438,7 +468,10 @@ class ConvCloudVision(CloudVision):
             return self.get_configlets_by_device(net_element_id=device_id)
 
     def move_device_to_container(
-        self, container_name: str, device_name: str, save: Optional[bool] = False
+        self,
+        container_name: str,
+        device_name: str,
+        save: Optional[bool] = False,
     ) -> Any:
         to_container_id = self.get_container_by_name(container_name).get("key")
         if device := self.get_device_by_name(device_name):

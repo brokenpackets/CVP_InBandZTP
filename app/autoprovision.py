@@ -4,10 +4,11 @@ import logging
 
 from ruamel.yaml import YAML
 
-from cloudvision import ConvCloudVision, CvpWarning
-
+from cvpibztp.cloudvision import ConvCloudVision, CvpWarning
+from cvpibztp.common import connection_details
 
 logging.basicConfig(level="DEBUG")
+log = logging.getLogger(__name__)
 
 
 def load_yaml(data):
@@ -15,11 +16,7 @@ def load_yaml(data):
 
 
 def main():
-    server = "cvp-green.lab.tedor.org"
-    username = "cvpadmin"
-    password = "Arista123"
-
-    with ConvCloudVision(server, username, password, verify=False) as cvp:
+    with ConvCloudVision(**connection_details()) as cvp:
         seed_raw = cvp.get_configlet_by_name("ztp_seed_data.yaml")
         seed_data = load_yaml(seed_raw.get("config"))
 
@@ -30,7 +27,8 @@ def main():
         ]
         for device in ztp_devices:
             data = next(
-                (d for d in seed_data if d["serial"] == device["serialNumber"]), None,
+                (d for d in seed_data if d["serial"] == device["serialNumber"]),
+                None,
             )
             if data is None:
                 continue
@@ -49,8 +47,21 @@ def main():
                 "proposedConfiglets"
             )
             ds_configlets = cvp.search_configlets(f"ds_{device_new_name}_").get("data")
+            configlets = proposed_configlets + ds_configlets
+
+            log.debug(configlets)
+            if container_name in {"MGMT-ToR", "MGMT-Spine"}:
+                configlet_builder_id = cvp.get_configlet_by_name(
+                    "ztp_l2_domain.py"
+                ).get("key")
+                response = cvp.autobuilderconfiglet_generator(
+                    configlet_builder_id, net_element_ids=[device_id]
+                )
+                builder = response["data"][0]["configlet"]
+                configlets.append(builder)
+
             cvp.associate_configlets(
-                configlets=proposed_configlets + ds_configlets,
+                configlets=configlets,
                 device_name=device_raw_name,
                 target_ip=device_proposed_ip,
                 save=True,

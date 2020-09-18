@@ -1,0 +1,5 @@
+---
+- name: msp01
+  container: MGMT-Spine
+  serial: SSJ00000000
+...
